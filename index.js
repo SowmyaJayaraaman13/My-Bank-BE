@@ -1,13 +1,27 @@
 const express = require('express');
 require('dotenv').config();
-const queues = require('./services/bullmq/emitter/index')
-require('./services/bullmq/subscriber/index')
+const queues = require('./services/bullmq/emitter/index');
+require('./services/bullmq/subscriber/index');
+const { dbConnection } = require('./database');
+const routes1 = require("./routes/route")
+const passport = require('passport');
+const { jwtStrategy } = require('./passport');
+const router = require('./routes/token.route');
+const accounts = require('./routes/accounts');
 
 const app = express();
 const port = 3000;
 
 // Middleware to parse JSON
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use('/api', accounts);
+
+
+app.use(passport.initialize());
+passport.use('jwt', jwtStrategy)
+
 
 // Endpoint to add a job to the queue
 app.post('/add-job', async (req, res) => {
