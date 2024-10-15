@@ -2,24 +2,32 @@ const express = require('express');
 require('dotenv').config();
 const queues = require('./services/bullmq/emitter/index');
 require('./services/bullmq/subscriber/index');
-const { dbConnection } = require('./database');
-const routes1 = require("./routes/route")
+
+const { dbConnection } = require('./database/index');
+
 const passport = require('passport');
 const { jwtStrategy } = require('./passport');
-const router = require('./routes/token.route');
-const accounts = require('./routes/accounts');
 
+const { authMiddleWareHandler } = require('./authentication/auth');
 const app = express();
+
+app.use(authMiddleWareHandler);
+
+
+// import route files
+const accountRoutes = require('./routes/accounts');
+
 const port = 3000;
 
 // Middleware to parse JSON
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/api', accounts);
+app.use('/api', accountRoutes);
 
 
 app.use(passport.initialize());
+app.use(passport.session());
 passport.use('jwt', jwtStrategy)
 
 

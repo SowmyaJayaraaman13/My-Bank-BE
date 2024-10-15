@@ -1,6 +1,20 @@
+const express = require('express');
+const router = express.Router();
+
+const transactionController = require('../controllers/accounts');
+
+router.get('/transaction/:transactionId', transactionController.handleGetCardById);
+router.get('/transactions', transactionController.handleGetAllCards);
+router.post('/transaction', transactionController.hanldeCardCreation);
+router.put('/transaction/:transactionId', transactionController.handleCardUpdation);
+router.delete('/transaction/:transactionId', transactionController.handleCardDeletion);
+
+module.exports = router
+
+
 const express = require('express')
 const router = express.Router()
-const { dbConnection } = require('../database');
+const { dbConnection } = require('database\index');
 
 router.get('/transactions', async (req, res) => {
     try {

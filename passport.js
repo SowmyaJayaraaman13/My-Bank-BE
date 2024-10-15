@@ -1,39 +1,26 @@
 const { Strategy, ExtractJwt } = require('passport-jwt');
 
-const { dbConnection } = require('./database');
+const { dbConnection } = require('./database/index');
 
+
+const { getUserSecret } = require('./helpers/account');
 
 const jwtOptions = {
-    secretOrKey: process.env.JWT_SECRET,
+    // secretOrKey: process.env.JWT_SECRET,
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    secretOrKeyProvider: async (req, jwtPayload, done) => await getUserSecret(jwtPayload, done),
 };
 
-const jwtVerify = async (payload, done) => {
-    try {
+const jwtVerify = async (jwtPayload, done) => {    // id, email, iat, exp
+    try {  
 
-        console.log("payload---->", payload);
-
-        // let user = { 
-        //     id: "1a-2b-3c-4d-5e-6f", 
-        //     email: "mukarram@gmail.com", 
-        //     password: "123456789", role: 'admin' 
-        // };/
-
-        let { data, error } = await dbConnection.from('User').select('*');
+        let { data: user, error } = await dbConnection.from('User').select('*').eq('id', jwtPayload.id);
 
         if (error) {
-          throw { status: 404, message: `Error:${error}` }
+          throw new Error(`Error:${error}`);
         }
 
-        let user = data.filter(item => item.email === payload.email);
-
-        if(user?.length){
-            user = user
-        } else {
-            user = {};
-        }
-
-        user = user.email === payload.email ? user : {}
+        user = user.email === jwtPayload.email ? user : {}
 
         if (!user) {
             return done(null, false);
@@ -45,6 +32,7 @@ const jwtVerify = async (payload, done) => {
         done(error, false);
     }
 };
+
 const jwtStrategy = new Strategy(jwtOptions, jwtVerify);
 
 module.exports = {

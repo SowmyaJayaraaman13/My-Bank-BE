@@ -7,7 +7,7 @@ let responseObj = {
     data: {}
 };
 
-passport.authenticate('jwt', (err, user, info) => {
+passport.authenticate('jwt', { session: false }, (err, user, info) => {
    if (err) { 
       return next(err);
    }
