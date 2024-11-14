@@ -16,18 +16,26 @@ app.use(authMiddleWareHandler);
 
 // import route files
 const accountRoutes = require('./routes/accounts');
+const cardRoutes = require('./routes/card');
+const transactionRoutes = require('./routes/transaction');
+const categoryRoutes = require('./routes/category');
 
-const port = 3000;
+
+const port = 5000;
 
 // Middleware to parse JSON
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/api', accountRoutes);
+app.use('/api', cardRoutes);
+app.use('/api', transactionRoutes);
+app.use('/api', categoryRoutes);
+
 
 
 app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.session());
 passport.use('jwt', jwtStrategy)
 
 

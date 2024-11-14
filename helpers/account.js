@@ -55,8 +55,6 @@ const generateJwtToken = (userData) => {
             // exp: parseInt(expirationDate.getTime() / 1000, 10),
         }
 
-        console.log("userData--->", userData);
-
           let secretKey = userData.secret;   // secret: '29c53df3-fa7a-402b-be6a-a8b66bf63fdc'
         // let secretKey = process.env.JWT_SECRET;
         let token = jwt.sign(payload, secretKey, { expiresIn: '1h' });

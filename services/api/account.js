@@ -52,17 +52,22 @@ const signup = async ({ body }) => {
       name,
     }
 
-    const userPayload = {
-      name,
-      password,
-      email,
-      secret,
-      is_admin: true,
-    };
-
     let result;
+    let userPayload;
 
     const { data: accountData, error: accountError } = await dbConnection.from('Account').insert(accountPayload).select();
+
+    if(accountData?.length){
+      userPayload = {
+        name,
+        password,
+        email,
+        secret,
+        is_admin: true,
+        account_id: accountData[0]?.id
+      };
+    }
+  
 
     const { data: userData, error: userError } = await dbConnection.from('User').insert(userPayload).select();
 
@@ -71,7 +76,8 @@ const signup = async ({ body }) => {
       throw new Error(`Error:${JSON.stringify(error.message)}`);
     }
 
-    result = { ...result, accountData, userData };
+    // result = { ...result, accountData, userData };
+    return { success: true };
     return result;
 
   } catch (error) {
@@ -93,21 +99,24 @@ const login = async ({ body }) => {
       throw new Error(`Error:Email and password is mandatory`);
     }
 
-    let { data: users, error } = await dbConnection.from('User').select('*');
+    let { data: user, error } = await dbConnection.from('User').select('*, Account: account_id(*)').eq('email', email);
 
     if (error) {
       throw new Error(`Error:${JSON.stringify(error.message)}`);
     }
 
-    let userData = users.find(user => user.email === email);
+    const userData = user?.length ? user[0] : user;
 
-    if (email === userData.email && password === userData.password) {
+    if (password === userData.password) {
 
       let jwtResult = generateJwtToken(userData);
 
       resultData.token = `Bearer ${jwtResult.JwtToken}`;
       // resultData.expirationDate = `${jwtResult.ExpirationDate.toLocaleDateString()} ${jwtResult.ExpirationDate.toLocaleTimeString()}`;
-      resultData.data = userData;
+      resultData.account = userData?.Account;
+      Object.keys(resultData?.account).includes('id') && delete userData?.Account;
+      delete userData.secret;
+      resultData.user = userData;
 
     } else {
       throw new Error(`Error: Email/password does not match!!`);

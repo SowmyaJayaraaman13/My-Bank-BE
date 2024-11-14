@@ -13,16 +13,17 @@ const authMiddleWareHandler = async (req, res, next) => {
             next();
         } else {
 
-            passport.authenticate('jwt', (err, user, info) => {
+            passport.authenticate('jwt', (err, resultData, info) => {
                 if (err) {
                     return next(err);
                 }
 
-                if (!user) {
+                if (!resultData) {
                     return res.status(401).json('User is not authenticated!!!!')
                 }
 
-                // req.user = user;
+                req.account = resultData?.account;
+                req.user = resultData?.user;
                 next();
             })(req, res, next);
 

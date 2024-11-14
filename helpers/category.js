@@ -2,23 +2,46 @@
 // const uuid = require('uuid');
 // const jwt = require('jsonwebtoken');
 
-// const { dbConnection } = require('../database/index')
+const { dbConnection } = require('../database/index');
+
+const { conditionsHandler } = require('./index');
+
+const capitalizeFirstLetter = (string) => {
+    try {
+
+        return string.replace(/\b\w+/g, function (word) {
+            return word.charAt(0).toUpperCase() + word.slice(1);
+        });
+    } catch (error) {
+        console.log("Error in capitalizeFirstLetter", error);
+        throw error;
+    }
+}
 
 
-// const generateRandomSecret = () => {
-//     try {
+const queryAllCategoriesOrByIds = async ({ accountId, conditions = {} }) => {
+    try {
+        let queryBuilder = dbConnection.from('Category').select();
 
-//         const secret = uuid.v4();
-//         return secret;
+        if (Object.keys(conditions)?.length) {
+            queryBuilder = conditionsHandler({ queryBuilder, conditions });
+        }
 
-//     } catch (error) {
-//         console.log("Error in generateRandomSecret", error);
-//         throw error;
-//     }
-// }
+        const { data, error } = await queryBuilder.select('*');
 
+        if (error) {
+            throw new Error(`Error:${JSON.stringify(error)}`);
+        }
 
+        return data;
+    } catch (error) {
+        console.log(`Error in queryAllCardsOrByIds for account: ${accountId}`, error);
+        throw error;
+    }
 
-// module.exports = {
-//     getCategoryById
-// };
+};
+
+module.exports = {
+    capitalizeFirstLetter,
+    queryAllCategoriesOrByIds
+};

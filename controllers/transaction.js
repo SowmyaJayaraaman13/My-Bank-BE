@@ -1,69 +1,71 @@
 
-const cardService = require('../services/api/card');
+const transactionService = require('../services/api/transaction');
 
 
 const handleGetTransactionById = async (req, res) => {
-    const { params } = req;
+    const { params, account: { id: accountId }, user: { id: userId } } = req;
     try {
 
-        const card = await cardService.getTransactionById({ params });
-        res.status(201).json(card);
+        const transaction = await transactionService.getTransactionById({ params, accountId, userId });
+        res.status(201).json(transaction);
 
     } catch (error) {
-        console.log(`Error in handleGetTransactionById: ${error}`);
+        console.log(`Error in handleGetTransactionById: ${error} for user: ${userId} and account: ${accountId}`);
         res.status(400).json({ error: error.message });
     }
 }
 
 
 const handleGetAllTransactions = async (req, res) => {
+    const { account: { id: accountId }, user: { id: userId } } = req;
     try {
 
-        const cards = await cardService.getAllTransactions();
-        res.status(201).json(cards);
+        const transactions = await transactionService.getAllTransactions({ accountId, userId });
+        res.status(201).json(transactions);
 
     } catch (error) {
-        console.log(`Error in handleGetAllTransactions: ${error}`);
+        console.log(`Error in handleGetAllTransactions: ${error} for user: ${userId} and account: ${accountId}`);
         res.status(400).json({ error: error.message });
     }
 }
 
 const hanldeTransactionCreation = async (req, res) => {
-    const { body } = req;
+    const { body, account: { id: accountId }, user: { id: userId } } = req;
     try {
 
-        const card = await cardService.createTransaction({ body });
-        res.status(201).json(card);
+        const transaction = await transactionService.createTransaction({ accountId, userId, body });
+        res.status(201).json(transaction);
 
     } catch (error) {
-        console.log(`Error in hanldeTransactionCreation: ${error}`);
+        console.log(`Error in hanldeTransactionCreation: ${error} for user: ${userId} and account: ${accountId}`);
         res.status(400).json({ error: error.message });
     }
 }
 
 
 const handleTransactionUpdation = async (req, res) => {
-    const { body } = req;
+    const { body, account: { id: accountId }, params: { transactionId} } = req;
     try {
 
-        const card = await cardService.updateTransaction({ body });
-        res.status(201).json(card);
+        const transaction = await transactionService.updateTransaction({ body, accountId, transactionId });
+        res.status(201).json(transaction);
 
     } catch (error) {
-        console.log(`Error in handleTransactionUpdation: ${error}`);
+        console.log(`Error in handleTransactionUpdation: ${error} for account: ${accountId}`);
         res.status(400).json({ error: error.message });
     }
 }
 
 
 const handleTransactionDeletion = async (req, res) => {
+    const { account: { id: accountId }, params } = req;
     try {
 
-        const card = await cardService.deleteTransaction();
-        res.status(201).json(card);
+        const transaction = await transactionService.deleteTransaction({ accountId, params });
+        res.status(201).json(transaction);
 
     } catch (error) {
-        console.log(`Error in handleTransactionDeletion: ${error}`);
+        console.log(`Error in handleTransactionDeletion: ${error} for account: ${accountId}`);
         res.status(400).json({ error: error.message });
     }
 }

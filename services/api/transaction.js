@@ -2,20 +2,19 @@
 
 const { dbConnection } = require('../../database/index');
 
-const { generateRandomSecret, generateJwtToken } = require('../../helpers/account');
+const { queryAllTransactionsOrByIds, transactionHandler } = require('../../helpers/transaction');
 
 
-const getTransactionById = async ({ params }) => {
+const getTransactionById = async ({ accountId, userId, params }) => {
     const { transactionId } = params;
     try {
-
-        let { data, error } = await dbConnection.from('Transaction').select('*').eq('id', transactionId);
-
-        if (error) {
-            throw error;
-        }
-
-        return data;
+        const conditions = {
+            user_id: { eq: userId },
+            account_id: { eq: accountId },
+            id: { in: [transactionId] },
+        };
+        const transaction = await queryAllTransactionsOrByIds({ accountId, conditions });
+        return transaction;
 
     } catch (error) {
         console.log(`Error in getting transaction with Id: ${transactionId}`);
@@ -23,44 +22,39 @@ const getTransactionById = async ({ params }) => {
     }
 };
 
-const getAllTransactions = async () => {
+const getAllTransactions = async ({ accountId, userId }) => {
     try {
-
-        let { data, error } = await dbConnection.from('Transaction').select('*');
-
-        if (error) {
-            throw error;
-        }
-
-        return data;
-
+        const conditions = {
+            account_id: { eq: accountId },
+            user_id: { eq: userId },
+        };
+        const transactions = await queryAllCategoriesOrByIds({ accountId, conditions });
+        return transactions;
     } catch (error) {
         console.log(`Error in getting all the transactions: ${JSON.stringify(error)}`);
         throw error;
     }
 };
 
-const createTransaction = async ({ body }) => {
-    const { purpose, description, category, amount, date, mode, card } = body
+const createTransaction = async ({ accountId, userId, body }) => {
+    const { purpose, description, amount, date, mode, card, category, type } = body
     try {
+        let currentBalance;
+        let resultData = {};
+        if (type === 'EXPENSE') {
+            if (card?.balance > amount) {
+                currentBalance = card?.balance - amount;
 
-        const transactionPayload = {
-            purpose,
-            description,
-            category_id: category.value,
-            amount,
-            date,
-            mode_of_payment: mode,
-            card_id: card.value,
-        };
-
-        const { data, error } = await dbConnection.from('Transaction').insert(transactionPayload).select();
-
-        if (error) {
-            throw new Error(`Error:${JSON.stringify(error.message)}`);
+            } else {
+                throw Error('You dont have sufficient balance to proceed');
+            }
+            resultData = await transactionHandler({ accountId, userId, purpose, description, amount, date, mode, card, category, type, currentBalance });
+        } else {
+            currentBalance = card?.balance + amount;
+            resultData = await transactionHandler({ accountId, userId, purpose, description, amount, date, mode, card, category, type, currentBalance });
         }
 
-        return data;
+        return resultData;
 
     } catch (error) {
         console.log("Error in creating transaction", error);
@@ -68,8 +62,8 @@ const createTransaction = async ({ body }) => {
     }
 };
 
-const updateTransaction = async ({ params }) => {
-    const { transactionId } = params;
+const updateTransaction = async ({ accountId, body, transactionId }) => {
+    const {  } = body;
     try {
 
         const updatedData = {
