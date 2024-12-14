@@ -141,6 +141,10 @@ const setUserProfileUrl = async ({ accountId, userId, profileFile }) => {
 
     const imagePath = pathData?.path;
 
+    if(!imagePath){
+      throw new Error('Image path not found for this bucket');
+    }
+
     console.log("imagePath---->", imagePath);
 
     const { data: urlData, error: urlError } = await dbConnection.storage.from('fundflow').getPublicUrl(imagePath);
