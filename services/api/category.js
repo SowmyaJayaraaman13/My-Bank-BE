@@ -66,12 +66,14 @@ const createCategory = async ({ accountId, userId, body }) => {
 };
 
 const updateCategory = async ({ accountId, body, categoryId }) => {
-    const { label, icon } = body;
+    const { label, icon, isActive, description } = body;
     try {
 
         const updatedData = {
             ...( label?.length && { label: capitalizeFirstLetter(label), name: label.toUpperCase() }),
             ...( icon?.length && { icon }),
+            ...( description?.length && { description }),
+            ...( isBoolean(isActive) && { is_active: isActive }),
         };
 
         let { data, error } = await dbConnection.from('Category').update(updatedData).eq('id', categoryId).select();
