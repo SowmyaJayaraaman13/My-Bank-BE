@@ -55,10 +55,24 @@ const handleLogin = async (req, res) => {
     }
 }
 
+const handleSetUserProfileUrl = async (req, res) => {
+    const { body: { profileFile }, account: { id: accountId }, user: { id: userId } } = req;
+    try {
+
+        const data = await accountService.setUserProfileUrl({ accountId, userId, profileFile });
+        res.status(201).json(data);
+
+    } catch (error) {
+        console.log(`Error in handleSetUserProfileUrl: ${error}`);
+        res.status(400).json({ error: error.message });
+    }
+}
+
 
 module.exports = {
     handleGetUserAccount,
     handleGetAllAccounts,
     handleSignup,
     handleLogin,
+    handleSetUserProfileUrl,
 }

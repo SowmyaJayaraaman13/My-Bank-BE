@@ -57,17 +57,17 @@ const signup = async ({ body }) => {
 
     const { data: accountData, error: accountError } = await dbConnection.from('Account').insert(accountPayload).select();
 
-    if(accountData?.length){
+    if (accountData?.length) {
       userPayload = {
         name,
         password,
         email,
         secret,
         is_admin: true,
-        account_id: accountData[0]?.id
+        account_id: accountData[0]?.id,
       };
     }
-  
+
 
     const { data: userData, error: userError } = await dbConnection.from('User').insert(userPayload).select();
 
@@ -130,9 +130,48 @@ const login = async ({ body }) => {
   }
 };
 
+const setUserProfileUrl = async ({ accountId, userId, profileFile }) => {
+  try {
+
+    const { data: pathData, error: pathError } = await dbConnection.storage.from('fundFlow').upload(`public/userId_${profileFile}`, profileFile);
+
+    if (pathError) {
+      throw new Error(`Error while uploading user profile picture:${JSON.stringify(pathError.message)}`);
+    }
+
+    const imagePath = pathData?.path;
+
+    console.log("imagePath---->", imagePath);
+
+    const { data: urlData, error: urlError } = await dbConnection.storage.from('fundflow').getPublicUrl(imagePath);
+
+    if (urlError) {
+      throw new Error(`Error while getting user profile picture url:${JSON.stringify(urlError.message)}`);
+    }
+
+    const imagePublicUrl = urlData?.publicUrl;
+
+    console.log("imagePublicUrl---->", imagePublicUrl);
+
+
+    const updatedData = {
+      profile_url: imagePublicUrl
+    };
+
+    let { data, error } = await dbConnection.from('User').update(updatedData).eq('id', userId).select();
+
+    return data;
+
+  } catch (error) {
+    console.log(`Error in creating user profile url for user: ${userId}`, error);
+    throw error;
+  }
+};
+
 module.exports = {
   getAccountById,
   getAllAccounts,
   signup,
-  login
+  login,
+  setUserProfileUrl
 }
