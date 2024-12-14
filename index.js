@@ -1,5 +1,6 @@
 const express = require('express');
 require('dotenv').config();
+const cors = require('cors')
 const queues = require('./services/bullmq/emitter/index');
 require('./services/bullmq/subscriber/index');
 
@@ -11,6 +12,9 @@ const { jwtStrategy } = require('./passport');
 const { authMiddleWareHandler } = require('./authentication/auth');
 const app = express();
 
+app.use(cors({
+  origin: '*'
+}))
 app.use(authMiddleWareHandler);
 
 
