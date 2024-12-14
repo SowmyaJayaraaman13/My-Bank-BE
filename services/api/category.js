@@ -39,7 +39,7 @@ const getAllCategories = async ({ accountId, userId }) => {
 };
 
 const createCategory = async ({ accountId, userId, body }) => {
-    const { label, icon } = body
+    const { label, icon, description } = body
     try {
 
         const categoryPayload = {
@@ -48,6 +48,7 @@ const createCategory = async ({ accountId, userId, body }) => {
           icon,
           account_id: accountId,
           user_id: userId,
+          description: description || '',
         };
 
         const { data, error } = await dbConnection.from('Category').insert(categoryPayload).select();

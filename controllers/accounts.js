@@ -2,15 +2,15 @@
 const accountService = require('../services/api/account');
 
 
-const handleGetAccountById = async (req, res) => {
-    const { params } = req;
+const handleGetUserAccount = async (req, res) => {
+    const { account, user } = req;
     try {
 
-        const account = await accountService.getAccountById({ params });
-        res.status(201).json(account);
+        const userAccountData = { user, account };
+        res.status(201).json(userAccountData);
 
     } catch (error) {
-        console.log(`Error in handleGetAccountById: ${error}`);
+        console.log(`Error in handleGetUserAccount: ${error}`);
         res.status(400).json({ error: error.message });
     }
 }
@@ -57,7 +57,7 @@ const handleLogin = async (req, res) => {
 
 
 module.exports = {
-    handleGetAccountById,
+    handleGetUserAccount,
     handleGetAllAccounts,
     handleSignup,
     handleLogin,
