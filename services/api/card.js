@@ -42,14 +42,14 @@ const getAllCards = async ({ accountId, userId }) => {
 };
 
 const createCard = async ({ accountId, userId, body }) => {
-    const { name, number, type, exp_date, balance } = body
+    const { name, number, type, expDate, balance } = body
     try {
 
         const cardPayload = {
             name,
             number,
             type,
-            expiry: exp_date,
+            expiry: expDate,
             balance,
             account_id: accountId,
             user_id: userId,

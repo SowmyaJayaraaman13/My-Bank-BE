@@ -5,7 +5,7 @@ const cardController = require('../controllers/card');
 
 router.get('/card/:cardId', cardController.handleGetCardById);
 router.get('/cards', cardController.handleGetAllCards);
-router.post('/public/card', cardController.hanldeCardCreation);
+router.post('/card', cardController.hanldeCardCreation);
 router.put('/card/:cardId', cardController.handleCardUpdation);
 router.delete('/card/:cardId', cardController.handleCardDeletion);
 
