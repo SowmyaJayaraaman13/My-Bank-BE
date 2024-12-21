@@ -132,8 +132,8 @@ const login = async ({ body }) => {
 
 const setUserProfileUrl = async ({ accountId, userId, profileFile }) => {
   try {
-
-    const { data: pathData, error: pathError } = await dbConnection.storage.from('fundFlow').upload(`public/userId_${profileFile}`, profileFile);
+    
+    const { data: pathData, error: pathError } = await dbConnection.storage.from('fundFlow').upload(`public/userId_${userId}`, profileFile.originalname, profileFile.buffer, { contentType: profileFile.mimetype });
 
     if (pathError) {
       throw new Error(`Error while uploading user profile picture:${JSON.stringify(pathError.message)}`);

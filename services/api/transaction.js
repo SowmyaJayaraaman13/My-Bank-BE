@@ -3,6 +3,7 @@
 const { dbConnection } = require('../../database/index');
 
 const { queryAllTransactionsOrByIds, transactionHandler } = require('../../helpers/transaction');
+const { getCardById } = require('./card');
 
 
 const getTransactionById = async ({ accountId, userId, params }) => {
@@ -37,21 +38,21 @@ const getAllTransactions = async ({ accountId, userId }) => {
 };
 
 const createTransaction = async ({ accountId, userId, body }) => {
-    const { purpose, description, amount, date, mode, card, category, type } = body
+    const { purpose, description, amount, date, mode, cardId, categoryId, type } = body
     try {
+        const card = await getCardById({ accountId, userId, params: { cardId } });
         let currentBalance;
         let resultData = {};
         if (type === 'EXPENSE') {
-            if (card?.balance > amount) {
-                currentBalance = card?.balance - amount;
-
+            if (card[0]?.balance > amount) {
+                currentBalance = card[0]?.balance - amount;
             } else {
                 throw Error('You dont have sufficient balance to proceed');
             }
-            resultData = await transactionHandler({ accountId, userId, purpose, description, amount, date, mode, card, category, type, currentBalance });
+            resultData = await transactionHandler({ accountId, userId, purpose, description, amount, date, mode, card: card[0], categoryId, type, currentBalance });
         } else {
-            currentBalance = card?.balance + amount;
-            resultData = await transactionHandler({ accountId, userId, purpose, description, amount, date, mode, card, category, type, currentBalance });
+            currentBalance = card[0]?.balance + amount;
+            resultData = await transactionHandler({ accountId, userId, purpose, description, amount, date, mode, card: card[0], categoryId, type, currentBalance });
         }
 
         return resultData;

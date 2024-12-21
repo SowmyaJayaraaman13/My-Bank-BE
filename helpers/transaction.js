@@ -26,7 +26,7 @@ const queryAllTransactionsOrByIds = async (ids, conditions) => {
     }
 };
 
-const transactionHandler = async ({ accountId, userId, purpose, description, amount, date, mode, card, category, type, currentBalance }) => {
+const transactionHandler = async ({ accountId, userId, purpose, description, amount, date, mode, card, categoryId, type, currentBalance }) => {
     try {
 
         const { data: cardData, error: cardError } = await dbConnection.from('Card').update({ balance: currentBalance }).eq('id', card?.id).select();
@@ -36,7 +36,7 @@ const transactionHandler = async ({ accountId, userId, purpose, description, amo
         const transactionPayload = {
             purpose,
             description,
-            category_id: category.id,
+            category_id: categoryId,
             amount,
             date,
             mode_of_payment: mode,
