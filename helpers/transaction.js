@@ -1,5 +1,6 @@
 const uuid = require('uuid');
 const jwt = require('jsonwebtoken');
+const { mongoose } = require('../database/mongoDB');
 
 const { dbConnection } = require('../database/index')
 const { conditionsHandler, databaseErrorHandler } = require('./index');
@@ -60,10 +61,34 @@ const transactionHandler = async ({ accountId, userId, purpose, description, amo
     }
 }
 
+const findTransaction = async({ transactionId, accountId, userId}) => {
+    try {
+        const { data, error } = await dbConnection.from('Transaction').select('*, card_id(*), category_id(*), user_id(*)').eq('id', transactionId).eq('account_id', accountId).eq('user_id', userId);
+        if (error) databaseErrorHandler({ error: error });
+        return data[0];
+    } catch (error) {
+        console.log(`Error in findTransaction: ${JSON.stringify(error)}`);
+        throw error;
+    }
+}
+
+const syncTransactionToMongoDB = async ({ transactionId, accountId, userId}) => {
+    const mongoDB = mongoose.connection.db;
+    const collection = mongoDB.collection('transactions');
+    const transaction = await collection.findOne({ _id: transactionId });
+    if (transaction) {
+        await collection.updateOne({ _id: transactionId }, { $set: { accountId, userId } });
+    } else {
+        const { id, ...transactionData } = await findTransaction({ transactionId, accountId, userId });
+        await collection.insertOne({ _id: id, ...transactionData });
+    }
+}
+
 
 module.exports = {
     queryAllTransactionsOrByIds,
-    transactionHandler
+    transactionHandler,
+    syncTransactionToMongoDB
 };
 
 

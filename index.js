@@ -3,6 +3,7 @@ require('dotenv').config();
 const cors = require('cors');
 const queues = require('./services/bullmq/emitter/index');
 require('./services/bullmq/subscriber/index');
+require('./database/mongoDB');
 
 const { dbConnection } = require('./database/index');
 

@@ -1,4 +1,4 @@
-
+const dayjs = require('dayjs');
 
 const { dbConnection } = require('../../database/index');
 
@@ -132,8 +132,8 @@ const login = async ({ body }) => {
 
 const setUserProfileUrl = async ({ accountId, userId, profileFile }) => {
   try {
-    
-    const { data: pathData, error: pathError } = await dbConnection.storage.from('fundFlow').upload(`public/userId_${userId}`, profileFile.originalname, profileFile.buffer, { contentType: profileFile.mimetype });
+    console.log("profileFile---->", profileFile);
+    const { data: pathData, error: pathError } = await dbConnection.storage.from('fundFlow').upload(`public/userId_${userId}/${profileFile.originalname}`, profileFile.buffer, { contentType: profileFile.mimetype, upsert: true });
 
     if (pathError) {
       throw new Error(`Error while uploading user profile picture:${JSON.stringify(pathError.message)}`);

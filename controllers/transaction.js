@@ -30,11 +30,12 @@ const handleGetAllTransactions = async (req, res) => {
 }
 
 const hanldeTransactionCreation = async (req, res) => {
+    const queues = require('../services/bullmq/emitter/index');
     const { body, account: { id: accountId }, user: { id: userId } } = req;
     try {
-
         const transaction = await transactionService.createTransaction({ accountId, userId, body });
-        res.status(201).json(transaction);
+        await queues.transactionQueue.publish('syncTransaction', { transactionId: transaction.transactionData[0].id, accountId, userId });
+        res.status(201).json({ message: 'Transaction created' });
 
     } catch (error) {
         console.log(`Error in hanldeTransactionCreation: ${error} for user: ${userId} and account: ${accountId}`);
